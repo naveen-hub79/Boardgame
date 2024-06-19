@@ -1,6 +1,3 @@
-#### Here's the Jenkins Pipeline script with added comments explaining the purpose of each stage, the tools, and the required configurations:
-
-
 
 pipeline {
 
