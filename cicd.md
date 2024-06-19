@@ -5,13 +5,23 @@ pipeline {
     agent any
     
     // Define the tools needed for the pipeline.
+    // these tools jdk, maven , sonar-scanner need to be installed in manage jenkins->tools after installing their required plugins
+    // the required plugins fro jdk, maven  and sonar-scanner are 
+    // 1. Eclipse Temurin Installer
+    // 2. Pipeline Maven Integration
+    // 3. maven integration
+    // 4. SonarQube Scanner
+
+
+
     tools {
         // Use JDK 17 for this pipeline.
         jdk 'jdk17'
         // Use Maven 3 for this pipeline.
         maven 'maven3'
     }
-    
+
+    // sonar-scanner tool used as part of environment and sonar server need to be configured in manage jenkins->systems along with url and credentials
     environment {
         // Define the environment variable for the SonarQube scanner home directory.
         SCANNER_HOME = tool 'sonar-scanner'
@@ -41,7 +51,7 @@ pipeline {
                 sh "mvn test"
             }
         }
-
+        // trivy need to be installed on jenkins machines and added to path as pre-requisiste
         stage('Scan File System using Trivy') {
             // This stage scans the file system for vulnerabilities using Trivy.
             steps {
@@ -49,7 +59,8 @@ pipeline {
                 sh "trivy fs --format table -o trivy-fs.report.html ."
             }
         }
-
+         // sonar server was configured in manage jenkins-systems with url and credentials(token) as pre-requisiste
+         //this step will generate reports and upload them to sonar server
         stage('SonarQube Analysis') {
             // This stage performs static code analysis using SonarQube.
             steps {
@@ -60,7 +71,8 @@ pipeline {
                  }
             }
         } 
-
+        // pre-requisite: jenkins webhook need to be pre-created to tell jenkins about quality gate status
+        // abortPipeline should be true if you wanted to stop pipeline on gate failure
         stage('Quality Gate Checking') {
             // This stage waits for the quality gate result from SonarQube.
             steps {
@@ -78,7 +90,9 @@ pipeline {
                 sh "mvn package"
             }
         }
-
+        // nexus repositories like maven-release and maven-snashots need to be added in pom.xml
+        // plugin: Config File Provider is required to generate setting.xml in jenkins to pass nexus credentials
+        // manage jenkins-> managed files and edit servers section to add nexus credentials to publish artifacts
         stage('Publish to Nexus') {
             // This stage publishes the built artifact to Nexus.
             steps {
@@ -88,7 +102,9 @@ pipeline {
                 }
             }
         }
-
+        // plugins: Docker and Docker Pipeline Step
+        // configure docker credentials
+        // docker installed in tools using manage jenkins-> tools
         stage('Build and Tag Docker Image') {
             // This stage builds and tags the Docker image.
             steps {
@@ -120,7 +136,8 @@ pipeline {
                 }
             }
         }
-
+        // Plugins: kubernets CLI and Kubernetes
+        // Service account with right permissions need to be created and generate token and add in global credentials
         stage('Deploy to Kubernetes') {
             // This stage deploys the application to a Kubernetes cluster.
             steps {
