@@ -1,4 +1,5 @@
-Here's the Jenkins Pipeline script with added comments explaining the purpose of each stage, the tools, and the required configurations:
+#### Here's the Jenkins Pipeline script with added comments explaining the purpose of each stage, the tools, and the required configurations:
+
 
 pipeline {
     // Specify the agent to run the pipeline. 'any' means it can run on any available agent.
